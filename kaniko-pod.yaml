@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kaniko
+spec:
+  containers:
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:latest
+      args:
+        - "--context=git://github.com/NCAR/ccpp-jhub-images.git"
+        - "--context-sub-path=images/base-image/"
+        - "--dockerfile=Containerfile"
+        - "--destination=hub.k8s.ucar.edu/ncote/kaniko-test:v1"
+      volumeMounts:
+        - name: kaniko-config-json
+          mountPath: /.docker
+          readOnly: true
+      env:
+        - name: DOCKER_CONFIG
+          value: /.docker
+  restartPolicy: Never
+  volumes:
+    - name: kaniko-config-json
+      secret:
+        secretName: kaniko-config-json
+        defaultMode: 0400
